@@ -58,3 +58,18 @@ class RoutesTest(TestCase):
         self.assertEqual(self.GROUP_POSTS, '/group/test-slug/')
         self.assertEqual(self.VIEW_POST, '/testuser/1/')
         self.assertEqual(self.POST_EDIT, '/testuser/1/edit/')
+
+    def test_urls_uses_correct_template(self):
+        """URL-адрес использует соответствующий шаблон."""
+        templates_url_names = {
+            INDEX: 'index.html',
+            NEW_POST: 'new_post.html',
+            self.GROUP_POSTS: 'group.html',
+            self.PROFILE: 'profile.html',
+            self.VIEW_POST: 'post.html',
+            self.POST_EDIT: 'new_post.html',
+        }
+        for url, template in templates_url_names.items():
+            with self.subTest():
+                response = self.authorized_client.get(url)
+                self.assertTemplateUsed(response, template)
