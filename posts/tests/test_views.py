@@ -19,17 +19,17 @@ class PagesTests(TestCase):
             description='Тестовое описание',
             slug='test-slug-empty'
         )
+        cls.user = User.objects.create_user(username='Test_lisa')
         cls.post = Post.objects.create(
             text='Тестовый пост',
-            author=User.objects.create_user(username='testuser'),
+            author=cls.user,
             group=cls.group_with_post
         )
 
     def setUp(self):
         # Создаём авторизованный клиент
-        self.user = User.objects.create_user(username='Test_lisa')
         self.authorized_client = Client()
-        self.authorized_client.force_login(self.user)
+        self.authorized_client.force_login(PagesTests.user)
 
     def test_index_show_correct_context(self):
         """Шаблон index сформирован с правильным контекстом."""
@@ -45,7 +45,7 @@ class PagesTests(TestCase):
         )
         group = response.context['group']
         expected_group = PagesTests.group_with_post
-        posts = response.context['posts']
+        posts = response.context['page']
         expected_posts = expected_group.posts.all()
         self.assertEqual(list(posts), list(expected_posts))
         self.assertEqual(group, expected_group)
@@ -68,6 +68,27 @@ class PagesTests(TestCase):
                 # указанного класса
                 self.assertIsInstance(form_field, expected)
 
+    def test_post_edit_correct_context(self):
+        """Словарь context, для страницы редактирования поста
+        соответствует."""
+        response = self.authorized_client.get(
+            reverse(
+                'post_edit',
+                kwargs={
+                    'username': self.post.author.username,
+                    'post_id': self.post.id
+                }
+            )
+        )
+        posts = Post.objects.filter(pk=self.post.id)
+        context = {
+            self.post.text: response.context['form'].initial['text'],
+            self.group_with_post.title: posts[0].group.title
+        }
+        for value, expected in context.items():
+            with self.subTest(value=value):
+                self.assertEqual(value, expected)
+
     def test_new_post_with_group_shown_on_index(self):
         # Удостоверимся, что если при создании поста указать группу,
         # то этот пост появляется
@@ -82,7 +103,7 @@ class PagesTests(TestCase):
         response = self.authorized_client.get(
             reverse('group_posts', kwargs={'slug': 'test-slug-empty'})
         )
-        posts = response.context['posts']
+        posts = response.context['page']
         self.assertEqual(len(posts), 0)
 
 

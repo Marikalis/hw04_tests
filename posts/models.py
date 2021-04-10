@@ -6,6 +6,7 @@ User = get_user_model()
 
 class Post(models.Model):
     text = models.TextField(
+        default='Ваш текст',
         verbose_name='Текст',
         help_text='Введите текст поста',
     )
