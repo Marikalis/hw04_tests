@@ -31,25 +31,6 @@ class PagesTests(TestCase):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
-    # Проверяем используемые шаблоны
-    def test_pages_uses_correct_template(self):
-        """URL-адрес использует соответствующий шаблон."""
-        # Собираем в словарь пары "имя_html_шаблона: reverse(name)"
-        templates_page_names = {
-            'index.html': reverse('index'),
-            'group.html': (
-                reverse('group_posts', kwargs={'slug': 'test-slug'})
-            ),
-            'new_post.html': reverse('new_post'),
-        }
-
-        # Проверяем, что при обращении к name
-        # вызывается соответствующий HTML-шаблон
-        for template, reverse_name in templates_page_names.items():
-            with self.subTest(template=template):
-                response = self.authorized_client.get(reverse_name)
-                self.assertTemplateUsed(response, template)
-
     def test_index_show_correct_context(self):
         """Шаблон index сформирован с правильным контекстом."""
         response = self.authorized_client.get(reverse('index'))
