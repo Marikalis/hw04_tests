@@ -89,6 +89,46 @@ class PagesTests(TestCase):
             with self.subTest(value=value):
                 self.assertEqual(value, expected)
 
+    def test_profile_correct_context(self):
+        """Словарь context, для страницы профайла пользователя
+        соответствует."""
+        response = self.authorized_client.get(
+            reverse(
+                'profile',
+                kwargs={
+                    'username': PagesTests.user.username,
+                }
+            )
+        )
+        user = response.context['user']
+        expected_user = PagesTests.user
+        posts = response.context['page']
+        expected_posts = expected_user.posts.all()[:10]
+        self.assertEqual(list(posts), list(expected_posts))
+        self.assertEqual(user, expected_user)
+
+    def test_post_view_correct_context(self):
+        """Словарь context, для страницы отдкльного поста
+        соответствует."""
+        response = self.authorized_client.get(
+            reverse(
+                'post',
+                kwargs={
+                    'username': self.post.author.username,
+                    'post_id': self.post.id
+                }
+            )
+        )
+        author = response.context['author']
+        expected_author = self.post.author
+        post = response.context['post']
+        expected_post = self.post
+        posts_count = response.context['posts_count']
+        expected_posts_count = len(expected_author.posts.all())
+        self.assertEqual(author, expected_author)
+        self.assertEqual(post, expected_post)
+        self.assertEqual(posts_count, expected_posts_count)
+
     def test_new_post_with_group_shown_on_index(self):
         # Удостоверимся, что если при создании поста указать группу,
         # то этот пост появляется

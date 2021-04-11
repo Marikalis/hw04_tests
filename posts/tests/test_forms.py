@@ -10,6 +10,10 @@ class PostFormTests(TestCase):
         self.user = User.objects.create_user(username='MarieL')
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
+        self.post = Post.objects.create(
+            text='Тестовый пост',
+            author=self.user,
+        )
 
     def test_create_post(self):
         """Валидная форма создает запись в Post."""
@@ -42,3 +46,24 @@ class PostFormTests(TestCase):
             response, 'form', 'text', 'Обязательное поле.'
         )
         self.assertEqual(response.status_code, 200)
+
+    def test_create_post_edit(self):
+        """dsafasfdasdf."""
+        text_after_edit = 'Тестовый пост после редактирования'
+        form_data = {
+            'text': text_after_edit
+        }
+        self.authorized_client.post(
+            reverse(
+                'post_edit',
+                kwargs={
+                    'username': self.post.author.username,
+                    'post_id': self.post.id
+                }
+            ),
+            data=form_data,
+            follow=True
+        )
+
+        post_after_edit = Post.objects.filter(pk=self.post.id)[0]
+        self.assertEqual(post_after_edit.text, text_after_edit)
