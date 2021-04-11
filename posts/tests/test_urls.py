@@ -1,4 +1,5 @@
 from django.test import Client, TestCase
+from django.urls import reverse
 
 from posts.models import Group, Post, User
 from posts.tests import test_routes
@@ -20,6 +21,26 @@ class URLTests(TestCase):
             text='a' * 20,
             author=cls.user
         )
+        cls.PROFILE = reverse(
+            'profile',
+            kwargs={'username': cls.user.username}
+        )
+        cls.GROUP_POSTS = reverse(
+            'group_posts',
+            kwargs={'slug': cls.group.slug}
+        )
+        cls.VIEW_POST = reverse(
+            'post',
+            kwargs={
+                'username': cls.post.author.username,
+                'post_id': cls.post.id}
+        )
+        cls.POST_EDIT = reverse(
+            'post_edit',
+            kwargs={
+                'username': cls.post.author.username,
+                'post_id': cls.post.id}
+        )
 
     def setUp(self):
         # Создаем неавторизованный клиент
@@ -33,9 +54,9 @@ class URLTests(TestCase):
         """Страницы доступны любому пользователю."""
         url_names = [
             test_routes.INDEX,
-            test_routes.RoutesTest.GROUP_POSTS,
-            test_routes.RoutesTest.PROFILE,
-            test_routes.RoutesTest.VIEW_POST
+            URLTests.GROUP_POSTS,
+            URLTests.PROFILE,
+            URLTests.VIEW_POST
         ]
         for url in url_names:
             with self.subTest():
@@ -52,7 +73,7 @@ class URLTests(TestCase):
         """Страницы доступны любому пользователю."""
         url_names = [
             test_routes.NEW_POST,
-            test_routes.RoutesTest.POST_EDIT
+            URLTests.POST_EDIT
         ]
         for url in url_names:
             with self.subTest():
