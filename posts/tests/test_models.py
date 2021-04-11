@@ -11,15 +11,17 @@ class PostModelTest(TestCase):
             text='a' * 20,
             author=User.objects.create_user(username='testuser')
         )
+        cls.TEXT_FIELD = 'text'
+        cls.GROUP_FIELD = 'group'
 
     def test_verbose_name(self):
         """verbose_name в полях совпадает с ожидаемым."""
         post = PostModelTest.post
         field_verboses = {
-            'text': 'Текст',
+            PostModelTest.TEXT_FIELD: 'Текст',
             'pub_date': 'Дата публикации',
             'author': 'Автор',
-            'group': 'Группа',
+            PostModelTest.GROUP_FIELD: 'Группа',
         }
         for value, expected in field_verboses.items():
             with self.subTest(value=value):
@@ -30,8 +32,8 @@ class PostModelTest(TestCase):
         """help_text в полях совпадает с ожидаемым."""
         post = PostModelTest.post
         field_help_texts = {
-            'text': 'Введите текст поста',
-            'group': 'Введите описание группы',
+            PostModelTest.TEXT_FIELD: 'Введите текст поста',
+            PostModelTest.GROUP_FIELD: 'Введите описание группы',
         }
         for value, expected in field_help_texts.items():
             with self.subTest(value=value):

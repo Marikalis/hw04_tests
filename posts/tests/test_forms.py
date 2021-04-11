@@ -8,11 +8,12 @@ from posts.tests import test_routes
 class PostFormTests(TestCase):
 
     def setUp(self):
+        self.POST_TEXT = 'Тестовый пост'
         self.user = User.objects.create_user(username='MarieL')
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
         self.post = Post.objects.create(
-            text='Тестовый пост',
+            text=self.POST_TEXT,
             author=self.user,
         )
 
@@ -28,7 +29,7 @@ class PostFormTests(TestCase):
         """Валидная форма создает запись в Post."""
         posts_count = Post.objects.count()
         form_data = {
-            'text': 'Тестовый пост'
+            'text': self.POST_TEXT
         }
         response = self.authorized_client.post(
             test_routes.NEW_POST,
@@ -39,7 +40,7 @@ class PostFormTests(TestCase):
         self.assertEqual(Post.objects.count(), posts_count + 1)
         self.assertTrue(
             Post.objects.filter(
-                text='Тестовый пост').exists()
+                text=self.POST_TEXT).exists()
         )
 
     def test_cant_create_post_without_text(self):
