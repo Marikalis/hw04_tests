@@ -133,11 +133,8 @@ class PagesTests(TestCase):
         expected_author = self.post.author
         post = response.context['post']
         expected_post = self.post
-        posts_count = response.context['posts_count']
-        expected_posts_count = len(expected_author.posts.all())
         self.assertEqual(author, expected_author)
         self.assertEqual(post, expected_post)
-        self.assertEqual(posts_count, expected_posts_count)
 
     def test_new_post_with_group_shown_on_index(self):
         # Удостоверимся, что если при создании поста указать группу,

@@ -51,7 +51,7 @@ class PostFormTests(TestCase):
             data=form_data,
             follow=True
         )
-        self.assertEqual(Post.objects.count(), posts_count)
+        self.assertEqual(Post.objects.count(), posts_count) 
         self.assertFormError(
             response, 'form', 'text', 'Обязательное поле.'
         )
