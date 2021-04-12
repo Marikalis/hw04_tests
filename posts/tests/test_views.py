@@ -64,8 +64,12 @@ class PagesTests(TestCase):
         """Шаблон index сформирован с правильным контекстом."""
         response = self.authorized_client.get(test_routes.INDEX)
         posts = response.context['page']
-        expected = Post.objects.all()
-        self.assertEqual(list(posts), list(expected))
+        expected = PagesTests.post
+        first_post = posts[0]
+        self.assertEqual(first_post.text, expected.text)
+        self.assertEqual(first_post.group, expected.group)
+        self.assertEqual(first_post.author, expected.author)
+        self.assertEqual(len(posts), 1)
 
     def test_group_show_correct_context(self):
         """Шаблон group_posts сформирован с правильным контекстом."""

@@ -1,24 +1,37 @@
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from posts.models import Post, User
-from posts.tests import test_routes
+from posts.models import Group, Post, User
+
+INDEX = reverse('index')
+NEW_POST = reverse('new_post')
+POST_TEXT = 'Тестовый пост'
 
 
 class PostFormTests(TestCase):
 
     def setUp(self):
-        self.POST_TEXT = 'Тестовый пост'
         self.user = User.objects.create_user(username='MarieL')
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
         self.post = Post.objects.create(
-            text=self.POST_TEXT,
+            text=POST_TEXT,
             author=self.user,
         )
-
+        self.group = Group.objects.create(
+            title='Название',
+            description='Описание',
+            slug='test-slug'
+        )
         self.EDIT_POST = reverse(
             'post_edit',
+            kwargs={
+                'username': self.post.author.username,
+                'post_id': self.post.id
+            }
+        )
+        self.POST = reverse(
+            'post',
             kwargs={
                 'username': self.post.author.username,
                 'post_id': self.post.id
@@ -27,47 +40,40 @@ class PostFormTests(TestCase):
 
     def test_create_post(self):
         """Валидная форма создает запись в Post."""
-        posts_count = Post.objects.count()
+        posts_before = set(Post.objects.all())
         form_data = {
-            'text': self.POST_TEXT
+            'text': POST_TEXT,
+            'group': self.group.id
         }
         response = self.authorized_client.post(
-            test_routes.NEW_POST,
+            NEW_POST,
             data=form_data,
             follow=True
         )
-        self.assertRedirects(response, test_routes.INDEX)
-        self.assertEqual(Post.objects.count(), posts_count + 1)
+        posts_after = set(Post.objects.all())
+        list_diff = posts_before ^ posts_after
+        new_post = list(list_diff)[0]
         self.assertTrue(
-            Post.objects.filter(
-                text=self.POST_TEXT).exists()
+            new_post.text == POST_TEXT
+            and new_post.group == self.group
+            and new_post.author == self.user
         )
+        self.assertRedirects(response, INDEX)
 
-    def test_cant_create_post_without_text(self):
-        posts_count = Post.objects.count()
-        form_data = {'text': ''}
-        response = self.authorized_client.post(
-            test_routes.NEW_POST,
-            data=form_data,
-            follow=True
-        )
-        self.assertEqual(Post.objects.count(), posts_count) 
-        self.assertFormError(
-            response, 'form', 'text', 'Обязательное поле.'
-        )
-        self.assertEqual(response.status_code, 200)
-
-    def test_create_post_edit(self):
+    def test_post_edit(self):
         """При редактировании поста изменяется запись в базе данных."""
         text_after_edit = 'Тестовый пост после редактирования'
         form_data = {
-            'text': text_after_edit
+            'text': text_after_edit,
+            'group': self.group.id
         }
-        self.authorized_client.post(
+        response = self.authorized_client.post(
             self.EDIT_POST,
             data=form_data,
             follow=True
         )
-
-        post_after_edit = Post.objects.filter(pk=self.post.id)[0]
+        self.assertRedirects(response, self.POST)
+        post_after_edit = response.context['post']
         self.assertEqual(post_after_edit.text, text_after_edit)
+        self.assertEqual(post_after_edit.group, self.group)
+        self.assertEqual(post_after_edit.author, self.user)
