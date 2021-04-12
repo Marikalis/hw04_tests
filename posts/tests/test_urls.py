@@ -70,7 +70,7 @@ class URLTests(TestCase):
         self.assertRedirects(response, '/auth/login/?next=/new/')
 
     def test_pages_for_authorized_users(self):
-        """Страницы доступны любому пользователю."""
+        """Страницы доступны авторизованному пользователю."""
         url_names = [
             test_routes.NEW_POST,
             URLTests.POST_EDIT
