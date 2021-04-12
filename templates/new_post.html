@@ -1,5 +1,11 @@
 {% extends "base.html" %}
-{% block title %}Новый пост{% endblock %}
+{% block title %}
+  {% if edit %}
+    Редактировать пост
+  {% else %}
+    Новый пост
+  {% endif %}
+{% endblock %}
 
 {% block content %}
   {% load user_filters %}
@@ -7,11 +13,13 @@
   <div class="row justify-content-center">
     <div class="col-md-8 p-5">
       <div class="card">
-        {% if edit == True %}
-          <div class="card-header">Редактировать запись</div>
-        {% else %}
-          <div class="card-header">Добавить запись</div>
-        {% endif %}
+        <div class="card-header">
+          {% if edit %}
+            Редактировать запись
+          {% else %}
+            Добавить запись
+          {% endif %}
+        </div>
         <div class="card-body">
 
           {% for error in form.errors %}
@@ -60,13 +68,13 @@
             {% endfor %}
 
             <div class="col-md-6 offset-md-4">
-              {% if edit == True %}              
-                <button type="submit"
-                  class="btn btn-primary">Добавить</button>
-              {% else %}
-                <button type="submit"
-                  class="btn btn-primary">Сохранить</button>
-              {% endif %}
+              <button type="submit" class="btn btn-primary">
+                {% if edit %}
+                  Добавить
+                {% else %}
+                  Сохранить
+                {% endif %}
+              </button>
             </div>
           </form>
         </div> <!-- card body -->
