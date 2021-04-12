@@ -5,6 +5,8 @@ from django.urls import reverse
 from posts.models import Group, Post, User
 from posts.tests import test_routes
 
+PAGE_SIZE = 10
+
 
 class PagesTests(TestCase):
     @classmethod
@@ -119,7 +121,7 @@ class PagesTests(TestCase):
         user = response.context['user']
         expected_user = PagesTests.user
         posts = response.context['page']
-        expected_posts = expected_user.posts.all()[:10]
+        expected_posts = expected_user.posts.all()[:PAGE_SIZE]
         self.assertEqual(list(posts), list(expected_posts))
         self.assertEqual(user, expected_user)
 
@@ -174,7 +176,10 @@ class PaginatorViewsTest(TestCase):
     def test_first_page_containse_ten_records(self):
         response = self.client.get(test_routes.INDEX)
         # Проверка: количество постов на первой странице равно 10.
-        self.assertEqual(len(response.context.get('page').object_list), 10)
+        self.assertEqual(
+            len(response.context.get('page').object_list),
+            PAGE_SIZE
+        )
 
     def test_second_page_containse_three_records(self):
         # Проверка: на второй странице должно быть три поста.
