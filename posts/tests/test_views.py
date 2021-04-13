@@ -84,33 +84,16 @@ class PagesTests(TestCase):
         self.assertEqual(list(posts), list(expected_posts))
         self.assertEqual(group, expected_group)
 
-    def test_post_edit_correct_context(self):
-        """Словарь context, для страницы редактирования поста
-        соответствует."""
-        response = self.authorized_client.get(
-            PagesTests.POST_EDIT
-        )
-        posts = Post.objects.filter(pk=self.post.id)
-        context = {
-            self.post.text: response.context['form'].initial['text'],
-            self.group_with_post.title: posts[0].group.title
-        }
-        for value, expected in context.items():
-            with self.subTest(value=value):
-                self.assertEqual(value, expected)
-
     def test_profile_correct_context(self):
         """Словарь context, для страницы профайла пользователя
         соответствует."""
         response = self.authorized_client.get(
             PagesTests.PROFILE
         )
-        user = response.context['user']
         expected_user = PagesTests.user
         posts = response.context['page']
         expected_posts = expected_user.posts.all()[:PAGE_SIZE]
         self.assertEqual(list(posts), list(expected_posts))
-        self.assertEqual(user, expected_user)
 
     def test_post_view_correct_context(self):
         """Словарь context, для страницы отдкльного поста
@@ -124,14 +107,6 @@ class PagesTests(TestCase):
         expected_post = self.post
         self.assertEqual(author, expected_author)
         self.assertEqual(post, expected_post)
-
-    def test_new_post_with_group_shown_on_index(self):
-        # Удостоверимся, что если при создании поста указать группу,
-        # то этот пост появляется
-        response = self.authorized_client.get(INDEX)
-        post_text = response.context['page'][0].text
-        expected_text = PagesTests.post.text
-        self.assertEqual(post_text, expected_text)
 
     def test_new_post_with_group_doesnt_shown_on_other_group(self):
         # Удостоверимся, что если при создании поста указать группу,
