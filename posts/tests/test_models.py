@@ -16,12 +16,12 @@ class PostModelTest(TestCase):
 
     def test_verbose_name(self):
         """verbose_name в полях совпадает с ожидаемым."""
-        post = PostModelTest.post
+        post = self.post
         field_verboses = {
-            PostModelTest.TEXT_FIELD: 'Текст',
+            self.TEXT_FIELD: 'Текст',
             'pub_date': 'Дата публикации',
             'author': 'Автор',
-            PostModelTest.GROUP_FIELD: 'Группа',
+            self.GROUP_FIELD: 'Группа',
         }
         for value, expected in field_verboses.items():
             with self.subTest(value=value):
@@ -30,10 +30,10 @@ class PostModelTest(TestCase):
 
     def test_help_text(self):
         """help_text в полях совпадает с ожидаемым."""
-        post = PostModelTest.post
+        post = self.post
         field_help_texts = {
-            PostModelTest.TEXT_FIELD: 'Введите текст поста',
-            PostModelTest.GROUP_FIELD: 'Введите описание группы',
+            self.TEXT_FIELD: 'Введите текст поста',
+            self.GROUP_FIELD: 'Введите описание группы',
         }
         for value, expected in field_help_texts.items():
             with self.subTest(value=value):
@@ -41,7 +41,7 @@ class PostModelTest(TestCase):
                     post._meta.get_field(value).help_text, expected)
 
     def test_post_str(self):
-        post = PostModelTest.post
+        post = self.post
         expected_object_name = post.text[:15]
         self.assertEquals(expected_object_name, str(post))
 

@@ -2,7 +2,9 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from posts.models import Group, Post, User
-from posts.tests import test_routes
+
+INDEX = reverse('index')
+NEW_POST = reverse('new_post')
 
 
 class URLTests(TestCase):
@@ -10,7 +12,6 @@ class URLTests(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.some_user = User.objects.create_user(username='someuser')
-        # Создаем пользователя
         cls.user = User.objects.create_user(username='testuser')
         cls.group = Group.objects.create(
             title='Тестовое название',
@@ -43,20 +44,17 @@ class URLTests(TestCase):
         )
 
     def setUp(self):
-        # Создаем неавторизованный клиент
         self.guest_client = Client()
-        # Создаем второй клиент
         self.authorized_client = Client()
-        # Авторизуем пользователя
-        self.authorized_client.force_login(URLTests.user)
+        self.authorized_client.force_login(self.user)
 
     def test_pages_for_guests(self):
         """Страницы доступны любому пользователю."""
         url_names = [
-            test_routes.INDEX,
-            URLTests.GROUP_POSTS,
-            URLTests.PROFILE,
-            URLTests.VIEW_POST
+            INDEX,
+            self.GROUP_POSTS,
+            self.PROFILE,
+            self.VIEW_POST
         ]
         for url in url_names:
             with self.subTest():
@@ -66,14 +64,14 @@ class URLTests(TestCase):
     def test_new_post_url_redirect_anonymous_on_admin_login(self):
         """Страница /new/ перенаправит анонимного пользователя
         на страницу логина."""
-        response = self.guest_client.get(test_routes.NEW_POST, follow=True)
+        response = self.guest_client.get(NEW_POST, follow=True)
         self.assertRedirects(response, '/auth/login/?next=/new/')
 
     def test_pages_for_authorized_users(self):
         """Страницы доступны авторизованному пользователю."""
         url_names = [
-            test_routes.NEW_POST,
-            URLTests.POST_EDIT
+            NEW_POST,
+            self.POST_EDIT
         ]
         for url in url_names:
             with self.subTest():
@@ -85,3 +83,22 @@ class URLTests(TestCase):
         self.authorized_client.force_login(self.some_user)
         response = self.authorized_client.get('/testuser/1/edit/', follow=True)
         self.assertRedirects(response, '/testuser/1/')
+
+    def test_urls_uses_correct_template(self):
+        """URL-адрес использует соответствующий шаблон."""
+        templates_url_names = {
+            INDEX: 'index.html',
+            NEW_POST: 'new_post.html',
+            self.GROUP_POSTS: 'group.html',
+            self.PROFILE: 'profile.html',
+            self.VIEW_POST: 'post.html',
+            self.POST_EDIT: 'new_post.html',
+        }
+        for url, template in templates_url_names.items():
+            with self.subTest():
+                response = self.authorized_client.get(url)
+                self.assertTemplateUsed(
+                    response,
+                    template,
+                    f'Шаблон {template}, не соответствует - {url}'
+                )

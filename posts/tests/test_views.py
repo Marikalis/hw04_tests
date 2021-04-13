@@ -58,13 +58,13 @@ class PagesTests(TestCase):
 
     def setUp(self):
         self.authorized_client = Client()
-        self.authorized_client.force_login(PagesTests.user)
+        self.authorized_client.force_login(self.user)
 
     def test_index_show_correct_context(self):
         """Шаблон index сформирован с правильным контекстом."""
         response = self.authorized_client.get(INDEX)
         posts = response.context['page']
-        expected = PagesTests.post
+        expected = self.post
         first_post = posts[0]
         self.assertEqual(first_post.text, expected.text)
         self.assertEqual(first_post.group, expected.group)
@@ -74,10 +74,10 @@ class PagesTests(TestCase):
     def test_group_show_correct_context(self):
         """Шаблон group_posts сформирован с правильным контекстом."""
         response = self.authorized_client.get(
-            PagesTests.GROUP_WITH_POSTS
+            self.GROUP_WITH_POSTS
         )
         group = response.context['group']
-        expected_group = PagesTests.group_with_post
+        expected_group = self.group_with_post
         posts = response.context['page']
         expected_posts = expected_group.posts.all()
         self.assertEqual(list(posts), list(expected_posts))
@@ -87,9 +87,9 @@ class PagesTests(TestCase):
         """Словарь context, для страницы профайла пользователя
         соответствует."""
         response = self.authorized_client.get(
-            PagesTests.PROFILE
+            self.PROFILE
         )
-        expected_user = PagesTests.user
+        expected_user = self.user
         posts = response.context['page']
         expected_posts = expected_user.posts.all()[:PAGE_SIZE]
         self.assertEqual(list(posts), list(expected_posts))
@@ -98,7 +98,7 @@ class PagesTests(TestCase):
         """Словарь context, для страницы отдкльного поста
         соответствует."""
         response = self.authorized_client.get(
-            PagesTests.VIEW_POST
+            self.VIEW_POST
         )
         author = response.context['author']
         expected_author = self.post.author
@@ -109,7 +109,7 @@ class PagesTests(TestCase):
 
     def test_new_post_with_group_doesnt_shown_on_other_group(self):
         response = self.authorized_client.get(
-            PagesTests.GROUP_WITHOUT_POSTS
+            self.GROUP_WITHOUT_POSTS
         )
         posts = response.context['page']
         self.assertFalse(self.post in posts)
