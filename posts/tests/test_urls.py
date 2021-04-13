@@ -6,6 +6,7 @@ from posts.models import Group, Post, User
 INDEX = reverse('index')
 NEW_POST = reverse('new_post')
 AUTH = '/auth/login'
+FAKE_PAGE = '/fake/page'
 
 
 class URLTests(TestCase):
@@ -55,6 +56,7 @@ class URLTests(TestCase):
         """Страницы доступны любому пользователю."""
         CODE_SUCCESS = 200
         CODE_REDIRECT = 302
+        CODE_NOT_FOUND = 404
         USER_GUEST_KEY = 'guest'
         USER_AUTHORIZED_KEY = 'user'
         USER_AUTHORIZED_OTHER_KEY = 'user_other'
@@ -67,7 +69,8 @@ class URLTests(TestCase):
             [USER_GUEST_KEY, self.POST_EDIT, CODE_REDIRECT],
             [USER_GUEST_KEY, self.GROUP_POSTS, CODE_SUCCESS],
             [USER_GUEST_KEY, self.PROFILE, CODE_SUCCESS],
-            [USER_GUEST_KEY, self.VIEW_POST, CODE_SUCCESS]
+            [USER_GUEST_KEY, self.VIEW_POST, CODE_SUCCESS],
+            [USER_GUEST_KEY, FAKE_PAGE, CODE_NOT_FOUND]
         ]
         for user, url, code in url_names:
             with self.subTest():

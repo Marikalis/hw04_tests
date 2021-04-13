@@ -79,3 +79,16 @@ def post_edit(request, username, post_id):
     edited_post = form.save(commit=False)
     edited_post.save()
     return redirect('post', username, post_id)
+
+
+def page_not_found(request, exception):
+    return render(
+        request,
+        "misc/404.html",
+        {"path": request.path},
+        status=404
+    )
+
+
+def server_error(request):
+    return render(request, "misc/500.html", status=500)
