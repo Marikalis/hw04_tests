@@ -8,44 +8,43 @@ NEW_POST = reverse('new_post')
 
 
 class RoutesTest(TestCase):
-    @classmethod
     def test_routes(self):
-        self.user = User.objects.create_user(username='testuser')
-        self.group = Group.objects.create(
+        user = User.objects.create_user(username='testuser')
+        group = Group.objects.create(
             title='Название',
             description='Описание',
             slug='test-slug'
         )
-        self.post = Post.objects.create(
+        post = Post.objects.create(
             text='Тестовый пост',
-            group=self.group,
-            author=self.user
+            group=group,
+            author=user
         )
-        self.authorized_client = Client()
-        self.authorized_client.force_login(self.user)
-        self.PROFILE = reverse(
+        authorized_client = Client()
+        authorized_client.force_login(user)
+        PROFILE = reverse(
             'profile',
-            kwargs={'username': self.user.username}
+            kwargs={'username': user.username}
         )
-        self.GROUP_POSTS = reverse(
+        GROUP_POSTS = reverse(
             'group_posts',
-            kwargs={'slug': self.group.slug}
+            kwargs={'slug': group.slug}
         )
-        self.VIEW_POST = reverse(
+        VIEW_POST = reverse(
             'post',
             kwargs={
-                'username': self.post.author.username,
-                'post_id': self.post.id}
+                'username': post.author.username,
+                'post_id': post.id}
         )
-        self.POST_EDIT = reverse(
+        POST_EDIT = reverse(
             'post_edit',
             kwargs={
-                'username': self.post.author.username,
-                'post_id': self.post.id}
+                'username': post.author.username,
+                'post_id': post.id}
         )
         self.assertEqual(INDEX, '/')
         self.assertEqual(NEW_POST, '/new/')
-        self.assertEqual(self.PROFILE, '/testuser/')
-        self.assertEqual(self.GROUP_POSTS, '/group/test-slug/')
-        self.assertEqual(self.VIEW_POST, '/testuser/1/')
-        self.assertEqual(self.POST_EDIT, '/testuser/1/edit/')
+        self.assertEqual(PROFILE, f'/{user.username}/')
+        self.assertEqual(GROUP_POSTS, f'/group/{group.slug}/')
+        self.assertEqual(VIEW_POST, f'/{user.username}/{post.id}/')
+        self.assertEqual(POST_EDIT, f'/{user.username}/{post.id}/edit/')

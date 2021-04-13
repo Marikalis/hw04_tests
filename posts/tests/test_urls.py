@@ -61,11 +61,22 @@ class URLTests(TestCase):
                 response = self.guest_client.get(url)
                 self.assertEqual(response.status_code, 200)
 
-    def test_new_post_url_redirect_anonymous_on_admin_login(self):
-        """Страница /new/ перенаправит анонимного пользователя
-        на страницу логина."""
-        response = self.guest_client.get(NEW_POST, follow=True)
-        self.assertRedirects(response, '/auth/login/?next=/new/')
+    def test_redirect(self):
+        """Перенаправление пользователя на страницу логина."""
+        templates_url_names = [
+            ['user', self.POST_EDIT, self.VIEW_POST],
+            ['guest', NEW_POST, INDEX + '?next=' + NEW_POST]
+        ]
+        for user, url, url_redirect in templates_url_names:
+            with self.subTest(url=url):
+                if user == 'user':
+                    user_page = self.user_client.get(url)
+                else:
+                    user_page = self.guest_client.get(url)
+                self.assertRedirects(
+                    user_page,
+                    url_redirect
+                )
 
     def test_pages_for_authorized_users(self):
         """Страницы доступны авторизованному пользователю."""
@@ -81,8 +92,8 @@ class URLTests(TestCase):
     def test_edit_not_author(self):
         """Страница редактирования поста недоступна другим пользователям"""
         self.authorized_client.force_login(self.some_user)
-        response = self.authorized_client.get('/testuser/1/edit/', follow=True)
-        self.assertRedirects(response, '/testuser/1/')
+        response = self.authorized_client.get(self.POST_EDIT, follow=True)
+        self.assertRedirects(response, self.VIEW_POST)
 
     def test_urls_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
