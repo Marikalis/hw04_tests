@@ -42,9 +42,14 @@ class RoutesTest(TestCase):
                 'username': post.author.username,
                 'post_id': post.id}
         )
-        self.assertEqual(INDEX, '/')
-        self.assertEqual(NEW_POST, '/new/')
-        self.assertEqual(PROFILE, f'/{user.username}/')
-        self.assertEqual(GROUP_POSTS, f'/group/{group.slug}/')
-        self.assertEqual(VIEW_POST, f'/{user.username}/{post.id}/')
-        self.assertEqual(POST_EDIT, f'/{user.username}/{post.id}/edit/')
+        routes_and_urls = [
+            [INDEX, '/'],
+            [NEW_POST, '/new/'],
+            [PROFILE, f'/{user.username}/'],
+            [GROUP_POSTS, f'/group/{group.slug}/'],
+            [VIEW_POST, f'/{user.username}/{post.id}/'],
+            [POST_EDIT, f'/{user.username}/{post.id}/edit/']
+        ]
+        for route_and_url in routes_and_urls:
+            with self.subTest(route_and_url=route_and_url):
+                self.assertEqual(route_and_url[0], route_and_url[1])
