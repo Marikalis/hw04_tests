@@ -1,8 +1,8 @@
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from .models import Group, Post, User
-from .settings import PAGE_SIZE
+from posts.models import Group, Post, User
+from posts.settings import PAGE_SIZE
 
 INDEX = reverse('index')
 NEW_POST = reverse('new_post')

@@ -4,8 +4,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import PostForm
 from .models import User, Group, Post
-
-PAGE_SIZE = 10
+from .settings import PAGE_SIZE
 
 
 def index(request):
