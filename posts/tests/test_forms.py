@@ -53,6 +53,7 @@ class PostFormTests(TestCase):
         posts_after = set(Post.objects.all())
         list_diff = posts_before ^ posts_after
         new_post = list(list_diff)[0]
+        self.assertEqual(len(list_diff), 1)
         self.assertTrue(
             new_post.text == POST_TEXT
             and new_post.group == self.group
