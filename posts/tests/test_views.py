@@ -57,7 +57,6 @@ class PagesTests(TestCase):
         )
 
     def setUp(self):
-        # Создаём авторизованный клиент
         self.authorized_client = Client()
         self.authorized_client.force_login(PagesTests.user)
 
@@ -109,13 +108,11 @@ class PagesTests(TestCase):
         self.assertEqual(post, expected_post)
 
     def test_new_post_with_group_doesnt_shown_on_other_group(self):
-        # Удостоверимся, что если при создании поста указать группу,
-        # то этот пост не появляется в другой группе
         response = self.authorized_client.get(
             PagesTests.GROUP_WITHOUT_POSTS
         )
         posts = response.context['page']
-        self.assertEqual(len(posts), 0)
+        self.assertFalse(self.post in posts)
 
 
 class PaginatorViewsTest(TestCase):
