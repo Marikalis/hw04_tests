@@ -1,3 +1,4 @@
+from django import forms
 from django.test import Client, TestCase
 from django.urls import reverse
 
@@ -78,3 +79,15 @@ class PostFormTests(TestCase):
         self.assertEqual(post_after_edit.text, text_after_edit)
         self.assertEqual(post_after_edit.group, self.group)
         self.assertEqual(post_after_edit.author, self.user)
+
+    def test_new_post_page_show_correct_context(self):
+        """Шаблон new_post сформирован с правильным контекстом."""
+        response = self.authorized_client.get(NEW_POST)
+        form_fields = {
+            'group': forms.models.ModelChoiceField,
+            'text': forms.fields.CharField
+        }
+        for value, expected in form_fields.items():
+            with self.subTest(value=value):
+                form_field = response.context['form'].fields[value]
+                self.assertIsInstance(form_field, expected)

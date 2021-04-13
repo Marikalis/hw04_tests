@@ -1,11 +1,12 @@
-from django import forms
 from django.test import Client, TestCase
 from django.urls import reverse
 
 from posts.models import Group, Post, User
-from posts.tests import test_routes
 
 PAGE_SIZE = 10
+INDEX = reverse('index')
+NEW_POST = reverse('new_post')
+DESCRIPTION = 'Тестовое описание'
 
 
 class PagesTests(TestCase):
@@ -14,12 +15,12 @@ class PagesTests(TestCase):
         super().setUpClass()
         cls.group_with_post = Group.objects.create(
             title='Группа с постом',
-            description='Описание',
+            description=DESCRIPTION,
             slug='test-slug'
         )
         cls.group_without_post = Group.objects.create(
             title='Группа без поста',
-            description='Тестовое описание',
+            description=DESCRIPTION,
             slug='test-slug-empty'
         )
         cls.user = User.objects.create_user(username='Test_lisa')
@@ -62,7 +63,7 @@ class PagesTests(TestCase):
 
     def test_index_show_correct_context(self):
         """Шаблон index сформирован с правильным контекстом."""
-        response = self.authorized_client.get(test_routes.INDEX)
+        response = self.authorized_client.get(INDEX)
         posts = response.context['page']
         expected = PagesTests.post
         first_post = posts[0]
@@ -82,24 +83,6 @@ class PagesTests(TestCase):
         expected_posts = expected_group.posts.all()
         self.assertEqual(list(posts), list(expected_posts))
         self.assertEqual(group, expected_group)
-
-    def test_new_post_page_show_correct_context(self):
-        """Шаблон new_post сформирован с правильным контекстом."""
-        response = self.authorized_client.get(test_routes.NEW_POST)
-        # Словарь ожидаемых типов полей формы:
-        # указываем, объектами какого класса должны быть поля формы
-        form_fields = {
-            'group': forms.models.ModelChoiceField,
-            'text': forms.fields.CharField
-        }
-        # Проверяем, что типы полей формы в словаре context
-        # соответствуют ожиданиям
-        for value, expected in form_fields.items():
-            with self.subTest(value=value):
-                form_field = response.context['form'].fields[value]
-                # Проверяет, что поле формы является экземпляром
-                # указанного класса
-                self.assertIsInstance(form_field, expected)
 
     def test_post_edit_correct_context(self):
         """Словарь context, для страницы редактирования поста
@@ -145,7 +128,7 @@ class PagesTests(TestCase):
     def test_new_post_with_group_shown_on_index(self):
         # Удостоверимся, что если при создании поста указать группу,
         # то этот пост появляется
-        response = self.authorized_client.get(test_routes.INDEX)
+        response = self.authorized_client.get(INDEX)
         post_text = response.context['page'][0].text
         expected_text = PagesTests.post.text
         self.assertEqual(post_text, expected_text)
@@ -178,7 +161,7 @@ class PaginatorViewsTest(TestCase):
         self.guest_client = Client()
 
     def test_first_page_containse_ten_records(self):
-        response = self.client.get(test_routes.INDEX)
+        response = self.client.get(INDEX)
         # Проверка: количество постов на первой странице равно 10.
         self.assertEqual(
             len(response.context.get('page').object_list),
@@ -187,5 +170,5 @@ class PaginatorViewsTest(TestCase):
 
     def test_second_page_containse_three_records(self):
         # Проверка: на второй странице должно быть три поста.
-        response = self.client.get(test_routes.INDEX + '?page=2')
+        response = self.client.get(INDEX + '?page=2')
         self.assertEqual(len(response.context.get('page').object_list), 3)
