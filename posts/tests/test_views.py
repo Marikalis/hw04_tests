@@ -1,9 +1,9 @@
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from posts.models import Group, Post, User
+from .models import Group, Post, User
+from .settings import PAGE_SIZE
 
-PAGE_SIZE = 10
 INDEX = reverse('index')
 NEW_POST = reverse('new_post')
 DESCRIPTION = 'Тестовое описание'
