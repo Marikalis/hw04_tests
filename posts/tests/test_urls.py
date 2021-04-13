@@ -5,6 +5,7 @@ from posts.models import Group, Post, User
 
 INDEX = reverse('index')
 NEW_POST = reverse('new_post')
+AUTH = '/auth/login'
 
 
 class URLTests(TestCase):
@@ -47,47 +48,56 @@ class URLTests(TestCase):
         self.guest_client = Client()
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
+        self.another_authorized_client = Client()
+        self.another_authorized_client.force_login(self.some_user)
 
-    def test_pages_for_guests(self):
+    def test_pages_codes(self):
         """Страницы доступны любому пользователю."""
+        CODE_SUCCESS = 200
+        CODE_REDIRECT = 302
+        USER_GUEST_KEY = 'guest'
+        USER_AUTHORIZED_KEY = 'user'
+        USER_AUTHORIZED_OTHER_KEY = 'user_other'
         url_names = [
-            INDEX,
-            self.GROUP_POSTS,
-            self.PROFILE,
-            self.VIEW_POST
+            [USER_GUEST_KEY, INDEX, CODE_SUCCESS],
+            [USER_GUEST_KEY, NEW_POST, CODE_REDIRECT],
+            [USER_AUTHORIZED_KEY, NEW_POST, CODE_SUCCESS],
+            [USER_AUTHORIZED_KEY, self.POST_EDIT, CODE_SUCCESS],
+            [USER_AUTHORIZED_OTHER_KEY, self.POST_EDIT, CODE_REDIRECT],
+            [USER_GUEST_KEY, self.POST_EDIT, CODE_REDIRECT],
+            [USER_GUEST_KEY, self.GROUP_POSTS, CODE_SUCCESS],
+            [USER_GUEST_KEY, self.PROFILE, CODE_SUCCESS],
+            [USER_GUEST_KEY, self.VIEW_POST, CODE_SUCCESS]
         ]
-        for url in url_names:
+        for user, url, code in url_names:
             with self.subTest():
-                response = self.guest_client.get(url)
-                self.assertEqual(response.status_code, 200)
+                if user == USER_GUEST_KEY:
+                    response = self.guest_client.get(url)
+                elif user == USER_AUTHORIZED_OTHER_KEY:
+                    response = self.another_authorized_client.get(url)
+                else:
+                    response = self.authorized_client.get(url)
+                self.assertEqual(
+                    code,
+                    response.status_code
+                )
 
     def test_redirect(self):
-        """Перенаправление пользователя на страницу логина."""
+        """Перенаправление пользователя."""
         templates_url_names = [
             ['user', self.POST_EDIT, self.VIEW_POST],
-            ['guest', NEW_POST, INDEX + '?next=' + NEW_POST]
+            ['guest', NEW_POST, AUTH + '/?next=' + NEW_POST]
         ]
         for user, url, url_redirect in templates_url_names:
             with self.subTest(url=url):
                 if user == 'user':
-                    user_page = self.user_client.get(url)
+                    user_page = self.another_authorized_client.get(url)
                 else:
                     user_page = self.guest_client.get(url)
                 self.assertRedirects(
                     user_page,
                     url_redirect
                 )
-
-    def test_pages_for_authorized_users(self):
-        """Страницы доступны авторизованному пользователю."""
-        url_names = [
-            NEW_POST,
-            self.POST_EDIT
-        ]
-        for url in url_names:
-            with self.subTest():
-                response = self.authorized_client.get(url)
-                self.assertEqual(response.status_code, 200)
 
     def test_edit_not_author(self):
         """Страница редактирования поста недоступна другим пользователям"""
