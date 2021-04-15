@@ -24,6 +24,11 @@ class PostFormTests(TestCase):
             description='Описание',
             slug='test-slug'
         )
+        self.group_other = Group.objects.create(
+            title='Название другой группы',
+            description='Описание другой группы',
+            slug='test-other-slug'
+        )
         self.EDIT_POST = reverse('post_edit', args=[
             self.post.author.username, self.post.id])
 
@@ -56,8 +61,9 @@ class PostFormTests(TestCase):
         text_after_edit = 'Тестовый пост после редактирования'
         form_data = {
             'text': text_after_edit,
-            'group': self.group.id
+            'group': self.group_other.id
         }
+        author_before_edit = self.post.author
         response = self.authorized_client.post(
             self.EDIT_POST,
             data=form_data,
@@ -66,8 +72,8 @@ class PostFormTests(TestCase):
         self.assertRedirects(response, self.POST)
         post_after_edit = response.context['post']
         self.assertEqual(post_after_edit.text, text_after_edit)
-        self.assertEqual(post_after_edit.group, self.group)
-        self.assertEqual(post_after_edit.author, self.user)
+        self.assertEqual(post_after_edit.group, self.group_other)
+        self.assertEqual(post_after_edit.author, author_before_edit)
 
     def test_new_post_page_show_correct_context(self):
         """Шаблон new_post сформирован с правильным контекстом."""

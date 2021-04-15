@@ -1,4 +1,4 @@
-from django.test import Client, TestCase
+from django.test import TestCase
 from django.urls import reverse
 from posts.models import Group, Post, User
 
@@ -20,8 +20,6 @@ class RoutesTest(TestCase):
             group=group,
             author=user
         )
-        authorized_client = Client()
-        authorized_client.force_login(user)
         PROFILE = reverse(
             'profile',
             kwargs={'username': user.username}

@@ -23,7 +23,8 @@ handler500 = "posts.views.server_error"
 urlpatterns = [
     path(
         'auth/',
-        include('users.urls')
+        include('users.urls'),
+        name='login'
     ),
     path(
         'auth/',
