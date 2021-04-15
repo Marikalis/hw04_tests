@@ -63,8 +63,8 @@ class PagesTests(TestCase):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
-    def test_index_show_correct_context(self):
-        """Шаблоны сформирован с правильным контекстом."""
+    def test_posts_correct_context(self):
+        """Шаблоны сформированы с правильным контекстом."""
         urls = [
             INDEX,
             GROUP_WITH_POSTS,
@@ -90,18 +90,18 @@ class PagesTests(TestCase):
         self.assertEqual(group.slug, expected_group.slug)
         self.assertEqual(group.description, expected_group.description)
 
-    def test_post_view_correct_context(self):
+    def test_author_correct_context(self):
         """Словарь context, для страницы отдкльного поста
         соответствует."""
-        response = self.authorized_client.get(
-            self.VIEW_POST
-        )
-        author = response.context['author']
-        expected_author = self.post.author
-        post = response.context['post']
-        expected_post = self.post
-        self.assertEqual(author, expected_author)
-        self.assertEqual(post, expected_post)
+        urls = [
+            self.VIEW_POST,
+            PROFILE
+        ]
+        for url in urls:
+            with self.subTest(url=url):
+                author = self.authorized_client.get(url).context['author']
+                expected_author = self.user
+                self.assertEqual(author, expected_author)
 
     def test_new_post_with_group_doesnt_shown_on_other_group(self):
         response = self.authorized_client.get(
