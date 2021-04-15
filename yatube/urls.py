@@ -24,22 +24,17 @@ urlpatterns = [
     path(
         'auth/',
         include('users.urls'),
-        name='login'
-    ),
+        name='login'),
     path(
         'auth/',
-        include('django.contrib.auth.urls')
-    ),
+        include('django.contrib.auth.urls')),
     path(
         'admin/',
-        admin.site.urls
-    ),
+        admin.site.urls),
     path(
         'about/',
-        include('about.urls', namespace='about')
-    ),
+        include('about.urls', namespace='about')),
     path(
         '',
-        include('posts.urls')
-    ),
+        include('posts.urls')),
 ]

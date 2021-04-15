@@ -8,11 +8,9 @@ urlpatterns = [
     path(
         'author/',
         views.AboutAuthorView.as_view(),
-        name='author'
-    ),
+        name='author'),
     path(
         'tech/',
         views.AboutTechView.as_view(),
-        name='tech'
-    ),
+        name='tech'),
 ]

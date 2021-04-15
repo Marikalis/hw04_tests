@@ -51,11 +51,12 @@ def profile(request, username):
 
 
 def post_view(request, username, post_id):
-    author = get_object_or_404(User, username=username)
     post = get_object_or_404(Post, author__username=username, id=post_id)
-    return render(request, 'post.html',
-                  {'author': author,
-                   'post': post})
+    author = post.author
+    return render(request, 'post.html', {
+        'author': author,
+        'post': post
+    })
 
 
 @login_required
@@ -68,27 +69,21 @@ def post_edit(request, username, post_id):
         instance=post
     )
     if not form.is_valid():
-        return render(
-            request,
-            'new_post.html',
-            {
-                'form': form,
-                'edit': True
-            }
-        )
-    edited_post = form.save(commit=False)
-    edited_post.save()
+        return render(request, 'new_post.html', {
+            'form': form,
+            'edit': True
+        })
+
+    form.save()
     return redirect('post', username, post_id)
 
 
 def page_not_found(request, exception):
-    return render(
-        request,
-        "misc/404.html",
-        {"path": request.path},
+    return render(request, 'misc/404.html', {
+        "path": request.path},
         status=404
     )
 
 
 def server_error(request):
-    return render(request, "misc/500.html", status=500)
+    return render(request, 'misc/500.html', status=500)
