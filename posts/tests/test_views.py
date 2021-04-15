@@ -64,13 +64,20 @@ class PagesTests(TestCase):
         self.authorized_client.force_login(self.user)
 
     def test_index_show_correct_context(self):
-        """Шаблон index сформирован с правильным контекстом."""
-        posts = self.authorized_client.get(INDEX).context['page']
-        first_post = posts[0]
-        self.assertEqual(len(posts), 1)
-        self.assertEqual(first_post.text, self.post.text)
-        self.assertEqual(first_post.group, self.post.group)
-        self.assertEqual(first_post.author, self.post.author)
+        """Шаблоны сформирован с правильным контекстом."""
+        urls = [
+            INDEX,
+            GROUP_WITH_POSTS,
+            PROFILE,
+        ]
+        for url in urls:
+            with self.subTest(url=url):
+                posts = self.authorized_client.get(url).context['page']
+                self.assertEqual(len(posts), 1)
+                first_post = posts[0]
+                self.assertEqual(first_post.text, self.post.text)
+                self.assertEqual(first_post.group, self.post.group)
+                self.assertEqual(first_post.author, self.post.author)
 
     def test_group_show_correct_context(self):
         """Шаблон group_posts сформирован с правильным контекстом."""
@@ -79,21 +86,9 @@ class PagesTests(TestCase):
         )
         group = response.context['group']
         expected_group = self.group_with_post
-        posts = response.context['page']
-        expected_posts = expected_group.posts.all()
-        self.assertEqual(list(posts), list(expected_posts))
-        self.assertEqual(group, expected_group)
-
-    def test_profile_correct_context(self):
-        """Словарь context, для страницы профайла пользователя
-        соответствует."""
-        response = self.authorized_client.get(
-            PROFILE
-        )
-        expected_user = self.user
-        posts = response.context['page']
-        expected_posts = expected_user.posts.all()[:PAGE_SIZE]
-        self.assertEqual(list(posts), list(expected_posts))
+        self.assertEqual(group.title, expected_group.title)
+        self.assertEqual(group.slug, expected_group.slug)
+        self.assertEqual(group.description, expected_group.description)
 
     def test_post_view_correct_context(self):
         """Словарь context, для страницы отдкльного поста
@@ -112,16 +107,20 @@ class PagesTests(TestCase):
         response = self.authorized_client.get(
             GROUP_WITHOUT_POSTS
         )
-        posts = response.context['page']
-        self.assertFalse(self.post in posts)
+        self.assertNotContains(response, self.post)
+
+
+SECOND_PAGE_ITEMS_COUNT = 1
+ITEMS_COUNT = PAGE_SIZE + SECOND_PAGE_ITEMS_COUNT
 
 
 class PaginatorViewsTest(TestCase):
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         user = User.objects.create_user(username='testuser')
-        for index in range(13):
+        for index in range(ITEMS_COUNT):
             note = f"запись номер {index} "
             Post.objects.create(
                 text=note,
@@ -131,13 +130,16 @@ class PaginatorViewsTest(TestCase):
     def setUp(self):
         self.guest_client = Client()
 
-    def test_first_page_containse_ten_records(self):
+    def test_first_page_content(self):
         response = self.client.get(INDEX)
         self.assertEqual(
             len(response.context.get('page').object_list),
             PAGE_SIZE
         )
 
-    def test_second_page_containse_three_records(self):
+    def test_second_page_content(self):
         response = self.client.get(INDEX + '?page=2')
-        self.assertEqual(len(response.context.get('page').object_list), 3)
+        self.assertEqual(
+            len(response.context.get('page').object_list),
+            SECOND_PAGE_ITEMS_COUNT
+        )
