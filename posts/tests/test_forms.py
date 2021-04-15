@@ -24,20 +24,11 @@ class PostFormTests(TestCase):
             description='Описание',
             slug='test-slug'
         )
-        self.EDIT_POST = reverse(
-            'post_edit',
-            kwargs={
-                'username': self.post.author.username,
-                'post_id': self.post.id
-            }
-        )
-        self.POST = reverse(
-            'post',
-            kwargs={
-                'username': self.post.author.username,
-                'post_id': self.post.id
-            }
-        )
+        self.EDIT_POST = reverse('post_edit', args=[
+            self.post.author.username, self.post.id])
+
+        self.POST = reverse('post', args=[
+            self.post.author.username, self.post.id])
 
     def test_create_post(self):
         """Валидная форма создает запись в Post."""
@@ -53,13 +44,11 @@ class PostFormTests(TestCase):
         )
         posts_after = set(Post.objects.all())
         list_diff = posts_before ^ posts_after
-        new_post = list(list_diff)[0]
+        new_post = next(iter(list_diff))
         self.assertEqual(len(list_diff), 1)
-        self.assertTrue(
-            new_post.text == POST_TEXT
-            and new_post.group == self.group
-            and new_post.author == self.user
-        )
+        self.assertEqual(new_post.text, POST_TEXT)
+        self.assertEqual(new_post.group, self.group)
+        self.assertEqual(new_post.author, self.user)
         self.assertRedirects(response, INDEX)
 
     def test_post_edit(self):
