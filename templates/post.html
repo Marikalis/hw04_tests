@@ -55,7 +55,12 @@
           <div class="d-flex justify-content-between align-items-center">
             <div class="btn-group ">
               <!-- Ссылка на редактирование, показывается только автору записи -->
-              <a class="btn btn-sm text-muted" href="{% url 'post_edit' post.author.username post.id %}" role="button">Редактировать</a>
+              <a class="btn btn-sm text-muted" href="{% url 'post_edit' post.author.username post.id %}" role="button">
+                {% if post.author.id == user.id %}
+                  Редактировать
+                {% else %}
+                {% endif %}
+              </a>
             </div>
             <!-- Дата публикации  -->
             <small class="text-muted">{{ post.pub_date|date:"d M Y" }}</small>

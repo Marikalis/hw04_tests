@@ -69,6 +69,7 @@ class PagesTests(TestCase):
             INDEX,
             GROUP_WITH_POSTS,
             PROFILE,
+            self.VIEW_POST,
         ]
         for url in urls:
             with self.subTest(url=url):
@@ -78,6 +79,7 @@ class PagesTests(TestCase):
                 self.assertEqual(first_post.text, self.post.text)
                 self.assertEqual(first_post.group, self.post.group)
                 self.assertEqual(first_post.author, self.post.author)
+                self.assertEqual(first_post, self.post)
 
     def test_group_show_correct_context(self):
         """Шаблон group_posts сформирован с правильным контекстом."""
