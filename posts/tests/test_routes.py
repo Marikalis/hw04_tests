@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.urls import reverse
+
 from posts.models import Post, User
 
 
@@ -44,5 +45,4 @@ class RoutesTest(TestCase):
             [POST_EDIT, f'/{user.username}/{post.id}/edit/']
         ]
         for route, url in routes_and_urls:
-            with self.subTest(route=route, url=url):
-                self.assertEqual(route, url)
+            self.assertEqual(route, url)

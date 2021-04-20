@@ -1,4 +1,5 @@
 from django import forms
+
 from django.test import Client, TestCase
 from django.urls import reverse
 
@@ -49,8 +50,8 @@ class PostFormTests(TestCase):
         )
         posts_after = set(Post.objects.all())
         list_diff = posts_before ^ posts_after
-        new_post = next(iter(list_diff))
         self.assertEqual(len(list_diff), 1)
+        new_post = list_diff.pop()
         self.assertEqual(new_post.text, POST_TEXT)
         self.assertEqual(new_post.group, self.group)
         self.assertEqual(new_post.author, self.user)
@@ -63,7 +64,6 @@ class PostFormTests(TestCase):
             'text': text_after_edit,
             'group': self.group_other.id
         }
-        author_before_edit = self.post.author
         response = self.authorized_client.post(
             self.EDIT_POST,
             data=form_data,
@@ -73,7 +73,7 @@ class PostFormTests(TestCase):
         post_after_edit = response.context['post']
         self.assertEqual(post_after_edit.text, text_after_edit)
         self.assertEqual(post_after_edit.group, self.group_other)
-        self.assertEqual(post_after_edit.author, author_before_edit)
+        self.assertEqual(post_after_edit.author, self.post.author)
 
     def test_new_post_page_show_correct_context(self):
         """Шаблон new_post сформирован с правильным контекстом."""
