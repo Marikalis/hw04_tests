@@ -119,7 +119,7 @@ class PagesTests(TestCase):
         response = self.authorized_client.get(
             GROUP_WITHOUT_POSTS
         )
-        self.assertNotContains(response, self.post)
+        self.assertNotIn(self.post, response.context['page'])
 
 
 SECOND_PAGE_ITEMS_COUNT = 1
