@@ -66,6 +66,7 @@ def post_edit(request, username, post_id):
     post = get_object_or_404(Post, author__username=username, id=post_id)
     form = PostForm(
         request.POST or None,
+        files=request.FILES or None,
         instance=post
     )
     if not form.is_valid():

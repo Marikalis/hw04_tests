@@ -8,17 +8,17 @@ class Post(models.Model):
     text = models.TextField(
         default='Ваш текст',
         verbose_name='Текст',
-        help_text='Введите текст поста',
+        help_text='Введите текст поста'
     )
     pub_date = models.DateTimeField(
         auto_now_add=True,
-        verbose_name='Дата публикации',
+        verbose_name='Дата публикации'
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='posts',
-        verbose_name='Автор',
+        verbose_name='Автор'
     )
     group = models.ForeignKey(
         'Group',
@@ -26,6 +26,11 @@ class Post(models.Model):
         related_name='posts',
         verbose_name='Группа',
         help_text='Введите описание группы',
+        blank=True,
+        null=True
+    )
+    image = models.ImageField(
+        upload_to='posts/',
         blank=True,
         null=True
     )
