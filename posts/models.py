@@ -32,7 +32,8 @@ class Post(models.Model):
     image = models.ImageField(
         upload_to='posts/',
         blank=True,
-        null=True
+        null=True,
+        help_text='Загрузите картинку'
     )
 
     def __str__(self):
