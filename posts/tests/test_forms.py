@@ -1,3 +1,6 @@
+import shutil
+import tempfile
+
 from django import forms
 
 from django.conf import settings
@@ -6,9 +9,6 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 
 from posts.models import Group, Post, User
-
-import shutil
-import tempfile
 
 INDEX = reverse('index')
 NEW_POST = reverse('new_post')
@@ -49,17 +49,12 @@ class PostFormTests(TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        # Модуль shutil - библиотека Python с прекрасными инструментами
-        # для управления файлами и директориями:
-        # создание, удаление, копирование, перемещение, изменение папок|файлов
-        # Метод shutil.rmtree удаляет директорию и всё её содержимое
         shutil.rmtree(settings.MEDIA_ROOT, ignore_errors=True)
         super().tearDownClass()
 
     def test_create_post(self):
         """Валидная форма создает запись в Post."""
         posts_before = set(Post.objects.all())
-         # Подготавливаем данные для передачи в форму
         small_gif = (
             b'\x47\x49\x46\x38\x39\x61\x02\x00'
             b'\x01\x00\x80\x00\x00\x00\x00\x00'
@@ -90,7 +85,7 @@ class PostFormTests(TestCase):
         self.assertEqual(new_post.text, POST_TEXT)
         self.assertEqual(new_post.group, self.group)
         self.assertEqual(new_post.author, self.user)
-        self.assertEqual(new_post.image, 'posts/small.gif')
+        self.assertEqual(new_post.image, f'posts/{uploaded_file.name}')
         self.assertRedirects(response, INDEX)
 
     def test_post_edit(self):
