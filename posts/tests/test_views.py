@@ -1,5 +1,9 @@
-from django.test import Client, TestCase
+import shutil
+
+from django.conf import settings
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
+from django.test import Client, TestCase
 
 from posts.models import Group, Post, User
 from posts.settings import PAGE_SIZE
@@ -39,10 +43,24 @@ class PagesTests(TestCase):
             slug=GROUP_WITHOUT_POST_SLAG
         )
         cls.user = User.objects.create_user(username=USERNAME)
+        small_gif = (
+            b'\x47\x49\x46\x38\x39\x61\x02\x00'
+            b'\x01\x00\x80\x00\x00\x00\x00\x00'
+            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
+            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
+            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
+            b'\x0A\x00\x3B'
+        )
+        cls.uploaded_file = SimpleUploadedFile(
+            name='small.gif',
+            content=small_gif,
+            content_type='image/gif'
+        )
         cls.post = Post.objects.create(
             text='Тестовый пост',
             author=cls.user,
-            group=cls.group_with_post
+            group=cls.group_with_post,
+            image=cls.uploaded_file
         )
         cls.VIEW_POST = reverse(
             'post',
@@ -58,6 +76,11 @@ class PagesTests(TestCase):
                 'post_id': cls.post.id
             }
         )
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(settings.MEDIA_ROOT, ignore_errors=True)
+        super().tearDownClass()
 
     def setUp(self):
         self.authorized_client = Client()
@@ -78,6 +101,9 @@ class PagesTests(TestCase):
                 self.assertEqual(first_post.text, self.post.text)
                 self.assertEqual(first_post.group, self.post.group)
                 self.assertEqual(first_post.author, self.post.author)
+                self.assertEqual(
+                    first_post.image, f'posts/{self.uploaded_file.name}'
+                )
 
     def test_view_post_correct_context(self):
         """Шаблон view_post сформирован с правильным контекстом."""
@@ -90,6 +116,9 @@ class PagesTests(TestCase):
             self.assertEqual(one_post.text, self.post.text)
             self.assertEqual(one_post.group, self.post.group)
             self.assertEqual(one_post.author, self.post.author)
+            self.assertEqual(
+                one_post.image, f'posts/{self.uploaded_file.name}'
+            )
 
     def test_group_show_correct_context(self):
         """Шаблон group_posts сформирован с правильным контекстом."""
@@ -103,7 +132,7 @@ class PagesTests(TestCase):
         self.assertEqual(group.description, expected_group.description)
 
     def test_author_correct_context(self):
-        """Словарь context, для страницы отдкльного поста
+        """Словарь context, для страницы отдельного поста
         соответствует."""
         urls = [
             self.VIEW_POST,
