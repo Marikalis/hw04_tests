@@ -82,11 +82,11 @@ class Comment(models.Model):
     )
     created = models.DateTimeField(
         auto_now_add=True,
-        verbose_name='Дата публикации'
+        verbose_name='Дата и время публикации'
     )
 
     def __str__(self):
-        return f'{self.text[:15]}'
+        return self.text
 
     class Meta:
-        ordering = ('created',)
+        ordering = ['-created']

@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 
-from .forms import PostForm
+from .forms import CommentForm, PostForm
 from .models import User, Group, Post
 from .settings import PAGE_SIZE
 
@@ -91,3 +91,15 @@ def page_not_found(request, exception):
 
 def server_error(request):
     return render(request, 'misc/500.html', status=500)
+
+
+@login_required
+def add_comment(request, username, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    form = CommentForm(request.POST or None)
+    if form.is_valid():
+        comment = form.save(commit=False)
+        comment.author = request.user
+        comment.post = post
+        comment.save()
+    return redirect('post', username=username, post_id=post_id)
