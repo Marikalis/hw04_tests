@@ -55,11 +55,15 @@ def profile(request, username):
 
 def post_view(request, username, post_id):
     post = get_object_or_404(Post, author__username=username, id=post_id)
-    author = post.author
-    return render(request, 'post.html', {
-        'author': author,
-        'post': post
-    })
+    comments = post.comments.all()
+    form = CommentForm(request.POST or None)
+    context = {
+        'post': post,
+        'author': post.author,
+        'form': form,
+        'comments': comments
+    }
+    return render(request, 'post.html', context)
 
 
 @login_required
