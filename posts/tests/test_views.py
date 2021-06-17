@@ -85,6 +85,7 @@ class PagesTests(TestCase):
     def setUp(self):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
+        self.guest_client = Client()
 
     def test_posts_correct_context(self):
         """Шаблоны сформированы с правильным контекстом."""
@@ -156,7 +157,6 @@ ITEMS_COUNT = PAGE_SIZE + SECOND_PAGE_ITEMS_COUNT
 
 
 class PaginatorViewsTest(TestCase):
-
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -183,4 +183,33 @@ class PaginatorViewsTest(TestCase):
         self.assertEqual(
             len(response.context.get('page').object_list),
             SECOND_PAGE_ITEMS_COUNT
+        )
+
+
+class CacheViewsTest(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user = User.objects.create_user(username='testuser')
+        post_note = 'Создаем пост'
+        Post.objects.create(
+            text=post_note,
+            author=cls.user
+        )
+
+    def setUp(self):
+        self.guest_client = Client()
+
+    def test_cache_index_pages(self):
+        """Проверяем работу кэша главной страницы."""
+        first_response = self.client.get(INDEX)
+        anoter_post_note = 'Еще один пост'
+        Post.objects.create(
+            text=anoter_post_note,
+            author=self.user
+        )
+        response_after_post_add = self.client.get(INDEX)
+        self.assertEqual(
+            len(first_response.content),
+            len(response_after_post_add.content)
         )

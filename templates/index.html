@@ -7,9 +7,12 @@
 
 {% block content %}
 
-  {% for post in page %}
-    {% include "post_item.html" %}
-  {% endfor %}
+  {% load cache %}
+  {% cache 20 index_page with page %}
+    {% for post in page %}
+      {% include "post_item.html" %}
+    {% endfor %}
+  {% endcache %}
 
   {% include "paginator.html" %}
 
